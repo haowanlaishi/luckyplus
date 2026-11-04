@@ -3,7 +3,8 @@
   "appName": "lucky",
   "webDir": "www",
   "ios": {
-    "scrollEnabled": false,
+       "scrollEnabled": false,
+    "scrollIndicator": false,
     "backgroundColor": "#f4f6f9"
   }
 }
