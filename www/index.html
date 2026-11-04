@@ -1,14 +1,58 @@
 <!DOCTYPE html><html lang="zh-CN"><head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover"><title>千万梦想基金</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>千万梦想基金</title>
 <style>
 :root{--p:#e63946;--s:#1d3557;--bg:#f4f6f9;--red:linear-gradient(135deg,#ff4b4b,#d90429);--blue:linear-gradient(135deg,#4cc9f0,#0077b6);--orange:linear-gradient(135deg,#f9c74f,#f8961e);--qf:linear-gradient(135deg,#5c5c99,#2d2d6b);--qb:linear-gradient(135deg,#f2c46d,#d4a037);--g:#e0e0e0;--gold:#d4a037;--gl:#f9c74f}
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-/* 👇 修复1：移动端 body 改为固定高度内部滚动 */
-body{font-family:-apple-system,sans-serif;background:var(--bg);color:#333;display:flex;flex-direction:column;align-items:center;height:100vh;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:0 15px 100px 15px;box-sizing:border-box;}
 
-/* 👇 修复2：增加 -webkit-sticky 和 flex-shrink，防止被挤压 */
-.top-sticky-wrapper{position:-webkit-sticky; position:sticky; top:0; z-index:1000; width:100%; max-width:400px; display:flex; flex-direction:column; align-items:center; background:rgba(244,246,249,0.85); backdrop-filter:blur(25px); -webkit-backdrop-filter:blur(25px); padding-top:calc(15px + env(safe-area-inset-top)); padding-bottom:5px; margin-bottom:10px; border-bottom:1px solid rgba(255,255,255,0.3); flex-shrink:0;}
+/* 👇 关键改动 1：锁死外层，禁止 iOS 原生橡皮筋 */
+html, body {
+  height: 100%;
+  overflow: hidden; 
+  background: var(--bg);
+  font-family: -apple-system, sans-serif;
+  color: #333;
+}
 
+/* 👇 关键改动 2：建立专属滚动容器，开启 GPU 硬件加速 */
+.app-scroll {
+  height: 100%;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch; 
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0 15px 100px 15px; 
+  box-sizing: border-box;
+  -webkit-transform: translate3d(0, 0, 0); 
+  transform: translate3d(0, 0, 0);
+  will-change: transform;
+}
+
+/* 👇 关键改动 3：吸顶完美锁定，磨砂玻璃保留 */
+.top-sticky-wrapper{
+  position:-webkit-sticky; 
+  position:sticky; 
+  top:0; 
+  z-index:1000; 
+  width:100%; 
+  max-width:400px; 
+  display:flex; 
+  flex-direction:column; 
+  align-items:center; 
+  background:rgba(244,246,249,0.65); 
+  backdrop-filter:blur(25px); 
+  -webkit-backdrop-filter:blur(25px); 
+  padding-top:calc(15px + env(safe-area-inset-top)); 
+  padding-bottom:5px; 
+  margin-bottom:10px; 
+  border-bottom:1px solid rgba(255,255,255,0.3); 
+  flex-shrink:0;
+}
+
+/* 以下保持原有样式 */
 .header{text-align:center;margin-bottom:10px;width:100%}
 .header h1{color:var(--s);font-size:22px}
 .tabs{display:flex;background:rgba(255,255,255,0.6);border-radius:12px;padding:5px;box-shadow:0 2px 10px rgba(0,0,0,.05);width:100%;margin-bottom:5px;border:1px solid rgba(255,255,255,0.5)}
@@ -56,15 +100,19 @@ body{font-family:-apple-system,sans-serif;background:var(--bg);color:#333;displa
 .nb.pop-anim { animation: jelly-pop 0.3s ease-in-out !important; }
 </style></head>
 <body>
-<div class="top-sticky-wrapper">
-  <div class="header"><h1>🎉 千万梦想基金</h1></div>
-  <div class="tabs"><div class="tab active" data-type="ssq">双色球</div><div class="tab" data-type="dlt">大乐透</div><div class="tab" data-type="qxc">七星彩</div></div>
-  <div class="ab"><div class="ms"><button class="mb active" data-mode="single">单式</button><button class="mb" data-mode="multi">复式</button></div><button class="ap" id="ap"><span class="c">✓</span><span>追加</span></button><div class="dv"></div><button class="hb" id="hb">记录 <span class="badge" id="badge">0</span></button></div>
+<div class="app-scroll">
+  <div class="top-sticky-wrapper">
+    <div class="header"><h1>🎉 千万梦想基金</h1></div>
+    <div class="tabs"><div class="tab active" data-type="ssq">双色球</div><div class="tab" data-type="dlt">大乐透</div><div class="tab" data-type="qxc">七星彩</div></div>
+    <div class="ab"><div class="ms"><button class="mb active" data-mode="single">单式</button><button class="mb" data-mode="multi">复式</button></div><button class="ap" id="ap"><span class="c">✓</span><span>追加</span></button><div class="dv"></div><button class="hb" id="hb">记录 <span class="badge" id="badge">0</span></button></div>
+  </div>
+  <div class="hp" id="hp"><div class="hh"><div class="ht" id="ht">选号记录</div><button class="cp" id="cp">复制</button><div class="ta" id="ta" style="display:none;">总计 <span id="tv">0</span> 元</div><button class="cb" id="cb">清空</button></div><div class="hl" id="hl"></div></div>
+  <div class="panel" id="mp"><div class="rd" id="rd"></div><div class="ra" id="ra"></div><div class="qp" id="qp" style="display:none"></div><div class="pa" id="pa"></div></div>
 </div>
-<div class="hp" id="hp"><div class="hh"><div class="ht" id="ht">选号记录</div><button class="cp" id="cp">复制</button><div class="ta" id="ta" style="display:none;">总计 <span id="tv">0</span> 元</div><button class="cb" id="cb">清空</button></div><div class="hl" id="hl"></div></div>
-<div class="panel" id="mp"><div class="rd" id="rd"></div><div class="ra" id="ra"></div><div class="qp" id="qp" style="display:none"></div><div class="pa" id="pa"></div></div>
+
 <div class="btns" id="bottom-btns"><button class="btn br" id="rb">🎲 机选填满</button><button class="btn bs" id="cf">✅ 确认选号</button></div>
 <div class="toast" id="toast">提示</div>
+
 <script>
 const LOT={
   ssq:{name:'双色球',desc:'红球(1-33)选6个，蓝球(1-16)选1个',groups:[
@@ -339,7 +387,7 @@ function randomFill(){
   const g1 = cfg.groups[0]; const g2 = cfg.groups[1];
   if(!state.locked[g1.id]) state.locked[g1.id]=[];
   if(!state.locked[g2.id]) state.locked[g2.id]=[];
-  if(!state.hasTriggerRandom){
+    if(!state.hasTriggerRandom){
     state.locked[g1.id] = [...state.sel[g1.id]];
     state.locked[g2.id] = [...state.sel[g2.id]];
     state.hasTriggerRandom=true;
@@ -347,8 +395,10 @@ function randomFill(){
   const g1AllLock = state.locked[g1.id].length >= g1.count;
   const g2AllLock = state.locked[g2.id].length >= g2.count;
   if(g1AllLock && g2AllLock){ toast('所有号码已手动锁定，无需机选填充'); render(); return; }
+  
   state.sel[g1.id] = [...state.locked[g1.id]];
   state.sel[g2.id] = [...state.locked[g2.id]];
+
   if(state.sel[g1.id].length < g1.count){
     let pool1=[];
     for(let i=g1.min;i<=g1.max;i++){ if(!state.locked[g1.id].includes(i)) pool1.push(i); }
@@ -658,10 +708,13 @@ $('cb').onclick=()=>{
 
 ap.onclick=toggleAppend;
 
+// 👇 关键改动 5：滚动监听移交给 .app-scroll，保住上滑隐藏功能
+const scrollContainer = document.querySelector('.app-scroll');
 let lastScrollTop = 0;
 const bottomBtns = document.getElementById('bottom-btns');
-window.addEventListener('scroll', () => {
-  let st = window.pageYOffset || document.documentElement.scrollTop;
+
+scrollContainer.addEventListener('scroll', () => {
+  let st = scrollContainer.scrollTop;
   if (st > lastScrollTop && st > 50) {
     bottomBtns.classList.add('hide-bar');
   } else {
@@ -671,7 +724,7 @@ window.addEventListener('scroll', () => {
 }, {passive: true});
 
 let scrollTimer;
-window.addEventListener('touchmove', () => {
+scrollContainer.addEventListener('touchmove', () => {
   clearTimeout(scrollTimer);
   scrollTimer = setTimeout(() => {
     bottomBtns.classList.remove('hide-bar');
