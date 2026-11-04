@@ -354,7 +354,8 @@ function randomFill(){
   if(state.sel[g2.id].length < g2.count){
     let pool2=[];
     for(let i=g2.min;i<=g2.max;i++){ if(!state.locked[g2.id].includes(i)) pool2.push(i); }
-    const need2 = g2.count - state.sel[g2.id].length;    for(let i=0;i<need2;i++){ const ri = Math.floor(Math.random()*pool2.length); state.sel[g2.id].push(pool2[ri]); pool2.splice(ri,1); }
+        const need2 = g2.count - state.sel[g2.id].length;
+    for(let i=0;i<need2;i++){ const ri = Math.floor(Math.random()*pool2.length); state.sel[g2.id].push(pool2[ri]); pool2.splice(ri,1); }
   }
   render();
 }
@@ -445,6 +446,9 @@ function copyRecords(){
 window.copyToOther = item => {
   const isStar = state.view === 'star'; const targetList = isStar ? state.list : state.starList;
   const newRec = JSON.parse(JSON.stringify(item)); newRec.id = Date.now() + Math.floor(Math.random()*1000);
+  
+  newRec.createdAt = Date.now(); // 👈 核心：打上时间戳
+  
   targetList.push(newRec); save(); toast(isStar ? '已加入记录' : '已加入收藏'); updateBadge();
 };
 
@@ -495,7 +499,20 @@ function renderList(){
         html+='</div>';
       }
     }
-    div.innerHTML=html; bindSwipe(div); sc.appendChild(sal); sc.appendChild(sar); sc.appendChild(div); hl.appendChild(sc);
+    
+    div.innerHTML=html;
+    
+    // 👈 绝对定位的水印时间，不改变原有高度
+    if (isStar && item.createdAt) {
+      const dt = new Date(item.createdAt);
+      const timeStr = `${dt.getFullYear()}-${pad2(dt.getMonth()+1)}-${pad2(dt.getDate())} ${pad2(dt.getHours())}:${pad2(dt.getMinutes())}`;
+      const timeDiv = document.createElement('div');
+      timeDiv.innerText = timeStr;
+      timeDiv.style.cssText = 'position:absolute; bottom:2px; right:6px; font-size:10px; color:#d0d0d0; pointer-events:none; z-index:10;';
+      div.appendChild(timeDiv);
+    }
+
+    bindSwipe(div); sc.appendChild(sal); sc.appendChild(sar); sc.appendChild(div); hl.appendChild(sc);
   });
 }
 
