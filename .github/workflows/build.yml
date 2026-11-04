@@ -1,0 +1,36 @@
+name: Build Unsigned iOS
+on: [workflow_dispatch]
+jobs:
+  build:
+    runs-on: macos-13
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          
+      - name: Install deps & sync
+        run: |
+          npm install
+          npx cap sync ios
+          
+      - name: Build unsigned archive
+        run: |
+          cd ios/App
+          xcodebuild -project App.xcodeproj -scheme App \
+            -configuration Release -sdk iphoneos \
+            -archivePath $RUNNER_TEMP/App.xcarchive \
+            archive CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO
+            
+      - name: Package artifact
+        run: |
+          cd $RUNNER_TEMP
+          zip -r App-unsigned.xcarchive.zip App.xcarchive
+          
+      - name: Upload
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-unsigned-build
+          path: ${{ runner.temp }}/App-unsigned.xcarchive.zip
